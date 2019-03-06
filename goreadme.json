@@ -1,0 +1,7 @@
+{
+	"recursive_sub_packages": true,
+	"badges": {
+		"go_doc": true,
+		"goreadme": true
+	}
+}

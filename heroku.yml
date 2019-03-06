@@ -1,0 +1,11 @@
+build:
+  languages:
+    - go
+
+run:
+  web: goreadme-server
+
+setup:
+  addons:
+    - plan: heroku-postgresql
+      as: DATABASE
