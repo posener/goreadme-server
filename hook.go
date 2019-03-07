@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/google/go-github/github"
+	"github.com/pkg/errors"
 	"github.com/posener/goreadme"
 	"github.com/sirupsen/logrus"
 )
