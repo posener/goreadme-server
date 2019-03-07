@@ -41,6 +41,7 @@ type Project struct {
 	Status        string
 	DefaultBranch string
 	Private       bool
+	Stars         int
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 }
@@ -118,7 +119,7 @@ func (j *Job) runInBackground(done chan<- struct{}) {
 		j.done(err, "Failed creating branch")
 		return
 	}
-	
+
 	sha, _, err := j.remoteReadme(ctx, goreadmeBranch)
 	if err != nil {
 		j.done(err, "Failed get remote readme SHA")
@@ -128,8 +129,8 @@ func (j *Job) runInBackground(done chan<- struct{}) {
 	// Check if the goreadme readme file is the same as the new one.
 	if sha == newSHA {
 		j.log.Infof("Readme in branch %s is up to date, making sure PR is open", goreadmeBranch)
-	} 
-	
+	}
+
 	// Commit changes to readme file.
 	err = j.commit(ctx, readmePath, newContent.Bytes(), sha)
 	if err != nil {

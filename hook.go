@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"github.com/google/go-github/github"
 	"github.com/posener/goreadme"
 	"github.com/sirupsen/logrus"
@@ -32,11 +34,10 @@ func (h *handler) hook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		h.runJob(r.Context(), &Project{
-			Install:       e.GetInstallation().GetID(),
-			Owner:         e.GetRepo().GetOwner().GetName(),
-			Repo:          e.GetRepo().GetName(),
-			HeadSHA:       e.GetHeadCommit().GetID(),
-			DefaultBranch: e.GetRepo().GetDefaultBranch(),
+			Install: e.GetInstallation().GetID(),
+			Owner:   e.GetRepo().GetOwner().GetName(),
+			Repo:    e.GetRepo().GetName(),
+			HeadSHA: e.GetHeadCommit().GetID(),
 		})
 	} else if e := tryInstall(payload); e != nil {
 		logrus.Infof("Install hook triggered added=%d removed=%d", len(e.RepositoriesAdded), len(e.RepositoriesRemoved))
@@ -110,10 +111,10 @@ func tryPullRequest(payload []byte) *github.PullRequestEvent {
 	return &e
 }
 
-func (h *handler) runJob(ctx context.Context, p *Project) (done <-chan struct{}, jobNum int) {
+func (h *handler) runJob(ctx context.Context, p *Project) (done <-chan struct{}, jobNum int, err error) {
 	cl, err := h.github.UserClient(ctx, p.Owner)
 	if err != nil {
-		logrus.Errorf("Failed getting user client: %s", err)
+		return nil, 0, errors.Wrap(err, "failed getting user client: %s")
 		return
 	}
 
@@ -121,18 +122,17 @@ func (h *handler) runJob(ctx context.Context, p *Project) (done <-chan struct{},
 
 	repo, _, err := gh.Repositories.Get(ctx, p.Owner, p.Repo)
 	if err != nil {
-		logrus.Errorf("failed getting repo data: %s", err)
-		return
+		return nil, 0, errors.Wrap(err, "failed getting repo data")
 	}
 	p.DefaultBranch = repo.GetDefaultBranch()
 	p.Private = repo.GetPrivate()
+	p.Stars = repo.GetStargazersCount()
 
 	// Update Head SHA if was not given.
 	if p.HeadSHA == "" {
 		gitData, _, err := gh.Git.GetRef(ctx, p.Owner, p.Repo, "refs/heads/"+p.DefaultBranch)
 		if err != nil {
-			logrus.Errorf("failed getting git data: %s", err)
-			return
+			return nil, 0, errors.Wrap(err, "failed getting git data")
 		}
 		p.HeadSHA = gitData.GetObject().GetSHA()
 	}
@@ -143,5 +143,6 @@ func (h *handler) runJob(ctx context.Context, p *Project) (done <-chan struct{},
 		github:   gh,
 		goreadme: goreadme.New(cl),
 	}
-	return j.Run()
+	done, jobNum = j.Run()
+	return done, jobNum, nil
 }

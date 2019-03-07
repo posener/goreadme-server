@@ -215,10 +215,15 @@ var Home = template.Must(template.Must(base.Clone()).Parse(`
 		{{ end }}
 
 		<div class="col-lg-4 col-12 mx-auto list-group">
-			<h5>Our Top Open Source Users</h5>
-			{{ range .OpenSourceProjects }}
-				<a class="list-group-item list-group-item-action" href="https://github.com/{{.Owner}}/{{.Repo}}">
+			<h5>
+				<i class="fa fa-x2 fa-trophy"></i>
+				Top Open Source Projects
+			</h5>
+			<small class="p2 pl-2">Total: {{.Stats.TotalProjects}}</small>
+			{{ range .Stats.TopProjects }}
+				<a class="list-group-item list-group-item-action text-center" href="https://github.com/{{.Owner}}/{{.Repo}}">
 					{{.Owner}}/{{.Repo}}
+					<span class="badge badge-info">{{.Stars}} <i class="fa fa-star"></i></span>
 				</a>
 			{{ end }}
 		</div>

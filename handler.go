@@ -30,14 +30,20 @@ type handler struct {
 }
 
 type templateData struct {
-	User               *github.User
-	InstallID          int64
-	Repos              []*github.Repository
-	Projects           []Project
-	Jobs               []Job
-	OpenSourceProjects []Project
+	User      *github.User
+	InstallID int64
+	Repos     []*github.Repository
+	Projects  []Project
+	Jobs      []Job
+	Stats     stats
 	// Holds an error that happened to show to the user
 	Error string
+}
+
+type stats struct {
+	// TopProjects will contain top open source projects
+	TopProjects   []Project
+	TotalProjects int
 }
 
 func (h *handler) dataFromRequest(w http.ResponseWriter, r *http.Request) *templateData {
@@ -56,17 +62,25 @@ func (h *handler) dataFromRequest(w http.ResponseWriter, r *http.Request) *templ
 
 func (h *handler) home(w http.ResponseWriter, r *http.Request) {
 	data := h.dataFromRequest(w, r)
+	// nil data is valid here.
 
-	err := h.db.Model(&Project{}).Where("private = FALSE").Order("updated_at DESC").Scan(&data.OpenSourceProjects).Limit(50).Error
+	err := h.db.Model(&Project{}).Where("private = FALSE").Order("stars DESC").Scan(&data.Stats.TopProjects).Limit(10).Error
 	if err != nil {
 		logrus.Errorf("Failed scanning open source projects: %s", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
+	err = h.db.Model(&Project{}).Count(&data.Stats.TotalProjects).Error
+	if err != nil {
+		logrus.Errorf("Failed counting projects: %s", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
 	err = templates.Home.Execute(w, data)
 	if err != nil {
-		h.doError(errors.Wrap(err, "failed executing template"), w, r)
+		h.doError(w, r, errors.Wrap(err, "failed executing template"))
 	}
 }
 
@@ -82,15 +96,13 @@ func (h *handler) projectsList(w http.ResponseWriter, r *http.Request) {
 
 	err := wh.Apply(h.db.Model(&Project{}).Order("updated_at DESC")).Scan(&data.Projects).Error
 	if err != nil {
-		logrus.Errorf("Failed scanning projects: %s", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		h.doError(w, r, errors.Wrap(err, "failed scanning projects"))
 		return
 	}
 
 	err = templates.Projects.Execute(w, data)
 	if err != nil {
-		logrus.Errorf("Failed executing template: %s", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		h.doError(w, r, errors.Wrap(err, "failed executing template"))
 	}
 }
 
@@ -106,12 +118,12 @@ func (h *handler) jobsList(w http.ResponseWriter, r *http.Request) {
 
 	err := wh.Apply(h.db.Model(&Job{}).Order("updated_at DESC")).Scan(&data.Jobs).Error
 	if err != nil {
-		h.doError(errors.Wrap(err, "failed scanning jobs"), w, r)
+		h.doError(w, r, errors.Wrap(err, "failed scanning jobs"))
 		return
 	}
 	err = templates.JobsList.Execute(w, data)
 	if err != nil {
-		h.doError(errors.Wrap(err, "failed executing template"), w, r)
+		h.doError(w, r, errors.Wrap(err, "failed executing template"))
 	}
 }
 
@@ -123,20 +135,20 @@ func (h *handler) addRepo(w http.ResponseWriter, r *http.Request) {
 
 	gh, err := h.github.UserGithubClient(r.Context(), data.User.GetLogin())
 	if err != nil {
-		h.doError(errors.Wrap(err, "failed getting github client"), w, r)
+		h.doError(w, r, errors.Wrap(err, "failed getting github client"))
 		return
 	}
 
 	repos, _, err := gh.Apps.ListRepos(r.Context(), nil)
 	if err != nil {
-		h.doError(errors.Wrap(err, "failed getting repos"), w, r)
+		h.doError(w, r, errors.Wrap(err, "failed getting repos"))
 		return
 	}
 
 	data.Repos = repos
 	err = templates.AddRepo.Execute(w, data)
 	if err != nil {
-		h.doError(errors.Wrap(err, "failed executing template"), w, r)
+		h.doError(w, r, errors.Wrap(err, "failed executing template"))
 	}
 }
 
@@ -151,23 +163,16 @@ func (h *handler) addRepoAction(w http.ResponseWriter, r *http.Request) {
 		repo  = r.FormValue("repo")
 	)
 
-	cl, err := h.github.UserGithubClient(r.Context(), data.User.GetLogin())
+	logrus.Info("Running goreadme in background...")
+	_, jobNum, err := h.runJob(r.Context(), &Project{
+		Owner:   owner,
+		Repo:    repo,
+		Install: data.InstallID,
+	})
 	if err != nil {
-		h.doError(errors.Wrap(err, "failed getting user client"), w, r)
-	}
-
-	repoData, _, err := cl.Repositories.Get(r.Context(), owner, repo)
-	if err != nil {
-		h.doError(errors.Wrap(err, "failed getting repository data"), w, r)
+		h.doError(w, r, err)
 		return
 	}
-	logrus.Info("Running goreadme in background...")
-	_, jobNum := h.runJob(r.Context(), &Project{
-		Owner:         owner,
-		Repo:          repo,
-		Install:       data.InstallID,
-		DefaultBranch: repoData.GetDefaultBranch(),
-	})
 	http.Redirect(w, r, fmt.Sprintf("/jobs?owner=%s&repo=%s&num=%d", owner, repo, jobNum), http.StatusFound)
 }
 
@@ -186,11 +191,11 @@ func (h *handler) badge(w http.ResponseWriter, r *http.Request) {
 
 	err = templates.Badge.Execute(w, &p)
 	if err != nil {
-		h.doError(errors.Wrap(err, "failed executing template"), w, r)
+		h.doError(w, r, errors.Wrap(err, "failed executing template"))
 	}
 }
 
-func (h *handler) doError(err error, w http.ResponseWriter, r *http.Request) {
+func (h *handler) doError(w http.ResponseWriter, r *http.Request, err error) {
 	logrus.Error(err)
 	http.Redirect(w, r, "/?error=internal%20server%error", http.StatusFound)
 }
@@ -205,12 +210,16 @@ func (h *handler) debugPR() {
 		return
 	}
 	logrus.Warnf("Debugging hook mode!")
-	done, _ := h.runJob(context.Background(), &Project{
+	done, _, err := h.runJob(context.Background(), &Project{
 		Owner:         os.Getenv("OWNER"),
 		Repo:          os.Getenv("REPO"),
 		HeadSHA:       os.Getenv("HEAD"),
 		DefaultBranch: "master",
 	})
+	if err != nil {
+		logrus.Errorf("Failed job: %s", err)
+		os.Exit(1)
+	}
 	<-done
 	os.Exit(0)
 }
