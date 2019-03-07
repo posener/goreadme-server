@@ -27,7 +27,7 @@ func (h *handler) hook(w http.ResponseWriter, r *http.Request) {
 	if e := tryPush(payload); e != nil {
 		logrus.Info("Push hook triggered")
 		if branchOfRef(e.GetRef()) != e.GetRepo().GetDefaultBranch() {
-			logrus.Infof("Skipping push to non default branch %s", e.GetRef())
+			logrus.Infof("Skipping push to non default branch %q", e.GetRef())
 			return
 		}
 		if e.GetInstallation().GetAppID() == int64(githubAppIDInt) {

@@ -33,6 +33,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/posener/goreadme-server/internal/googleanalytics"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -111,6 +113,8 @@ func main() {
 	m.Path("/auth/login").Handler(a.LoginHandler())
 	m.Path("/auth/logout").Handler(a.LogoutHandler())
 	m.Path("/auth/callback").Handler(a.CallbackHandler())
+
+	googleanalytics.AddToRouter(m, "/analytics")
 
 	mh := handlers.RecoveryHandler(handlers.PrintRecoveryStack(true), handlers.RecoveryLogger(logrus.StandardLogger()))(m)
 	if debug {
