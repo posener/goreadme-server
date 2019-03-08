@@ -28,6 +28,12 @@
 // modified. Goreadme then computes the new README.md file and compairs it
 // to the exiting one. If a change is needed, Goreadme will create a PR with
 // the new content of the README.md file.
+//
+// Customization
+//
+// Adding a `goreadme.json` file to your repository main directory can enable some
+// customization to the generated readme file. The configuration is available
+// according to https://godoc.org/github.com/posener/goreadme#Config.
 package main
 
 import (

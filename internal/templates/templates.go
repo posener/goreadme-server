@@ -225,6 +225,12 @@ var Home = template.Must(template.Must(base.Clone()).Parse(`
 			Goreadme service uses <a href="github.com/posener/goreadme">goreadme</a> - is a tool
 			created by the service author, for generating README.md files from Go doc of a given package.
 		</p>
+		<h5>Customization</h5>
+		<p>
+			Adding a <code>goreadme.json</code> file to your repository main directory can enable some
+			customization to the generated readme file. The configuration is available
+			according to <a href="https://godoc.org/github.com/posener/goreadme#Config"><code>goreadme.Config</code></a>
+		</p>
 	</div>
 	<div class="col-lg-5 col-12">
 
