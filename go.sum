@@ -182,6 +182,10 @@ github.com/posener/goreadme v0.0.0-20190304053359-ace82028b33a h1:FnOrLV29iVYeMs
 github.com/posener/goreadme v0.0.0-20190304053359-ace82028b33a/go.mod h1:ftiMo9ZqMCxjRWgTTlvDA4H1ZjMzs6gu+O7wqawAyvM=
 github.com/posener/goreadme v0.0.0-20190304063428-8c0f2f96b6a0 h1:NlKLke0KCBs6HPvhrX1DiwCmoxmgIUE4CqpQzintvbY=
 github.com/posener/goreadme v0.0.0-20190304063428-8c0f2f96b6a0/go.mod h1:ftiMo9ZqMCxjRWgTTlvDA4H1ZjMzs6gu+O7wqawAyvM=
+github.com/posener/goreadme v0.0.0-20190308072142-7d6ab20d087b h1:UNfbG+q+4rZmEg1W0t/ecdv9cSbrDypdZjy2vKg8F9c=
+github.com/posener/goreadme v0.0.0-20190308072142-7d6ab20d087b/go.mod h1:ftiMo9ZqMCxjRWgTTlvDA4H1ZjMzs6gu+O7wqawAyvM=
+github.com/posener/goreadme v0.0.0-20190308073843-43eca4cd4a95 h1:GVOt2cmrv21wzOw7RlMH3KYJZM4B3nC3kEr2AGXWvXw=
+github.com/posener/goreadme v0.0.0-20190308073843-43eca4cd4a95/go.mod h1:ftiMo9ZqMCxjRWgTTlvDA4H1ZjMzs6gu+O7wqawAyvM=
 github.com/prometheus/client_golang v0.8.0/go.mod h1:7SWBe2y4D6OKWSNQJUaRYU/AaXPKyh/dDVn+NZz0KFw=
 github.com/prometheus/client_golang v0.9.1/go.mod h1:7SWBe2y4D6OKWSNQJUaRYU/AaXPKyh/dDVn+NZz0KFw=
 github.com/prometheus/client_golang v0.9.2/go.mod h1:OsXs2jCmiKlQ1lTBmv21f2mNfw4xf/QclQDMrYNZzcM=
