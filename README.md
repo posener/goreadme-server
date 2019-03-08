@@ -5,25 +5,28 @@
 
 an HTTP server that works with Github hooks.
 
-[goreadme](github.com/posener/goreadme) is a tool for creating README.md
+Goreadme ([https://github.com/posener/goreadme](https://github.com/posener/goreadme)) is a tool for creating README.md
 files from Go doc of a given package.
 This project is the Github app on top of this tool. It fully automates
 the process of keeping the README.md file updated.
 
-## Usage
+#### Usage
 
 1. Go to [https://github.com/apps/goreadme](https://github.com/apps/goreadme).
+
 2. Press the "Configure" button.
-3. choose your account, or an organization that owns the repository.
+
+3. Choose your account, or an organization that owns the repository.
+
 4. Review the permissions and provide access to goreadme to repositories.
+
 5. Click Save.
 
 You should see PRs from goreadme bot in your github repos.
-
 For more features, or to trigger goreadme on demand to to
-[goreadme site](https://goreadme.herokuapp.com).
+[https://goreadme.herokuapp.com](https://goreadme.herokuapp.com).
 
-## How does it Work?
+How does it Work?
 
 Once integrated with a repository, goreadme is registered on a Github hook,
 that calls goreadme server whenever the repository default branch is
