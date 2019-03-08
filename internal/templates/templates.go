@@ -106,7 +106,6 @@ var base = template.Must(html.Parse(`
 					</a>
 				</li>
 			</ul>
-			{{if .User}}
 			<ul class="navbar-nav ml-auto">
 				<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -125,13 +124,11 @@ var base = template.Must(html.Parse(`
 					</div>
 				</li>
 			</ul>
-			{{end}}
 		</div>
 	{{ end }}
 </nav>
 
-	<div class="container">
-	<!-- <h4>{{block "title" .}}{{end}}</h4> -->
+	<div class="container p-4">
 
 	{{ if .Error }}
 		<div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -143,6 +140,8 @@ var base = template.Must(html.Parse(`
 	{{ end }}
 
 	{{template "content" .}}
+
+	</div>
 	
 	</div>
 
@@ -168,15 +167,19 @@ var base = template.Must(html.Parse(`
 		<ul class="list-inline">
 			<li class="list-inline-item"><a href="https://github.com/posener/goreadme">
 				<i class="fa fa-github" aria-hidden="true"></i>
-				Goreadme
+				goreadme
 			</a></li>
 			<li class="list-inline-item"><a href="https://github.com/posener/goreadme-server">
 				<i class="fa fa-github" aria-hidden="true"></i>
-				Goreadme-server
+				goreadme-server
 			</a></li>
 			<li class="list-inline-item"><a href="https://github.com/posener/goreadme-server/blob/master/LICENSE.txt">
 				<i class="fa fa-id-card-o" aria-hidden="true"></i>
-				MIT Licensed
+				MIT
+			</a></li>
+			<li class="list-inline-item"><a href="https://github.com/posener/goreadme-server/issues">
+				<i class="fa fa-bug" aria-hidden="true"></i>
+				Report a Bug
 			</a></li>
 		</ul>
   	</div>
@@ -187,65 +190,71 @@ var base = template.Must(html.Parse(`
 var Home = template.Must(template.Must(base.Clone()).Parse(`
 {{define "title"}}Login{{end}}
 {{define "content"}}
-<div class="container">
-	<div class="row">
-		<div class="col-lg-7 col-12 mx-auto">
-			<h4>Welcome</h4>
-			<p>
-				Goreadme is a Github app that automatically creates readme files from the Go doc of the project.
-			</p>
+<div class="row">
+	<div class="col-lg-7 col-12 mx-auto">
+		<h4>Welcome</h4>
+		<p>
+			Goreadme is a service that automatically creates and updates readme
+			files for Go Github projects from the Go doc of the project.
+		</p>
 
-			<p>
-			<a href="github.com/posener/goreadme">goreadme</a> is a tool for creating README.md
-			files from Go doc of a given package.
-			This website is the Github app on top of this tool. It fully automates
-			the process of keeping the README.md file updated.
-			</p>
-			<h5>Usage</h5>
-			<lu>
-				<li>
-					Go to <a target="_blank" href="https://github.com/apps/goreadme">https://github.com/apps/goreadme</a>.
-				</li>
-				<li>Press the "Configure" button.</li>
-				<li>Choose your account, or an organization that owns the repository.</li>
-				<li>Review the permissions and provide access to goreadme to repositories.</li>
-				<li>Click Save</li>
-			</lu>
-			<p>
+		<h5>Usage</h5>
+		<ol>
+			<li>
+				Go to <a target="_blank" href="https://github.com/apps/goreadme">Goreadme Github App page</a>.
+			</li>
+			<li>Press the "Configure" button.</li>
+			<li>Choose your account, or an organization that owns the repository.</li>
+			<li>Review the permissions and provide access to goreadme to repositories.</li>
+			<li>Click Save.</li>
+		</ol>
+		<p>
 			You should see PRs from goreadme bot in your Github repositories.
-			</p>
-			<h5>How does it Work?</h5>
+		</p>
+		<h5>How does it Work?</h5>
+		<p>
+			Once integrated with a repository, goreadme is registered on a Github hooks,
+			that calls goreadme server whenever the repository default branch is
+			modified. Goreadme then computes the new readme file and compairs it
+			to the exiting one. If a change is needed, Goreadme will create a PR with
+			the new content of the README.md file.
+			Genrating the readme file can also be triggered manually <a href="/projects">here</a>.
+		</p>
+		<p>
+			Goreadme service uses <a href="github.com/posener/goreadme">goreadme</a> - is a tool
+			created by the service author, for generating README.md files from Go doc of a given package.
+		</p>
+	</div>
+	<div class="col-lg-5 col-12">
+
+	{{ if not .User }}
+		<div class="jumbotron text-center">
+			<h4>Login</h4>
 			<p>
-				Once integrated with a repository, goreadme is registered on a Github hook,
-				that calls goreadme server whenever the repository default branch is
-				modified. Goreadme then computes the new README.md file and compairs it
-				to the exiting one. If a change is needed, Goreadme will create a PR with
-				the new content of the README.md file.
+				In order to use goreadme with your Github repositories, login is required.
 			</p>
+			<form action="/auth/login">
+			<button type="submit" class="btn btn-outline-primary">
+				<i class="fa fa-x2 fa-github" aria-hidden="true"></i>
+				Login with Github
+			</button>
+			</form>
 		</div>
-		<div class="col-lg-5 col-12">
+	{{ end }}
 
-		{{ if not .User }}
-			<div class="jumbotron text-center">
-				<h4>Login</h4>
-				<p>
-					In order to use goreadme with your Github repositories, login is required.
-				</p>
-				<form action="/auth/login">
-				<button type="submit" class="btn btn-outline-primary">
-					<i class="fa fa-x2 fa-github" aria-hidden="true"></i>
-					Login with Github
-				</button>
-				</form>
-			</div>
-		{{ end }}
-
-			<div>
-				<h4>
-					<i class="fa fa-x2 fa-trophy"></i>
-					Top Open Source Projects
+		<div class="card">
+			<div class="card-body">
+				<h4 class="card-title">
+					Stats
 				</h4>
-				<small class="p2 pl-2">Total: {{.Stats.TotalProjects}}</small>
+				<h5 class="card-subtitle mb-2 text-muted">
+					<i class="fa fa-x2 fa-balance-scale"></i>
+					Total: {{.Stats.TotalProjects}}
+				</h5>
+				<h5 class="card-subtitle mb-2 text-muted">
+					<i class="fa fa-x2 fa-trophy"></i>
+					Top Open Source Goreadmes
+				</h5>
 				<ul class="list-group">
 				{{ range .Stats.TopProjects }}
 					<a href="https://github.com/{{.Owner}}/{{.Repo}}" class="list-group-item d-flex justify-content-between align-items-center">
@@ -256,8 +265,8 @@ var Home = template.Must(template.Must(base.Clone()).Parse(`
 				</ul>
 			</div>
 		</div>
-
 	</div>
+
 </div>
 {{end}}
 `))
@@ -266,13 +275,13 @@ var headline = template.Must(base.Parse(`
 {{ define "headline" }}
 <div class="row row border-top rounded-sm bg-light">
 
-<div class="col-6 p-2 pl-3">
+<div class="col-8 p-2 pl-3">
 	<a href="/jobs?owner={{.Owner}}&repo={{.Repo}}"><i class="fa fa-filter" aria-hidden="true"></i></a>
 	<a href="https://github.com/{{.Owner}}/{{.Repo}}"><i class="fa fa-github" aria-hidden="true"></i></a>
 	{{.Owner}}/{{.Repo}}
 </div>
 
-<div class="col-4 p-2 pl-2">
+<div class="col-3 p-2 pl-2">
 	<div class="text-{{ color .Status }}">{{.Status}}</div>
 	{{if .PR}}
 	<div>
@@ -281,7 +290,7 @@ var headline = template.Must(base.Parse(`
 	{{end}}
 </div>
 
-<div class="col-2 p-2">
+<div class="col-1 p-2">
 	<form action="/add" method="post" class="float-right">
 		<input type="hidden" name="repo" value="{{.Repo}}">
 		<input type="hidden" name="owner" value="{{.Owner}}">
@@ -324,10 +333,10 @@ var projectRow = template.Must(base.Parse(`
 {{ template "headline" . }}
 
 <div class="row mt-md-2">
-	<div class="col-lg-2 col-6 p-2">
+	<div class="col-md-2 col-6 p-2">
 		{{ template "branch" . }}
 	</div>
-	<div class="col-lg-2 col-6 p-2">
+	<div class="col-md-2 col-6 p-2">
 		<div>
 			<i class="fa fa-calendar" aria-hidden="true"></i>
 			{{formatDate .UpdatedAt}}
@@ -338,7 +347,46 @@ var projectRow = template.Must(base.Parse(`
 		</small></div>	
 	</div>
 
-	<div class="col-lg-8 col-12 p-2 pl-3 pr-3 p-lg-2">
+	<div class="col-md-8 col-12 p-2 pl-3 pr-3 p-lg-2">
+		{{ template "message" . }}
+	</div>
+
+</div>
+
+</div>
+</div>
+{{ end }}
+`))
+
+var jobRow = template.Must(base.Parse(`
+{{ define "jobRow" }}
+<div class="row">
+<div class="col-12">
+
+{{ template "headline" . }}
+
+<div class="row mt-md-2">
+
+	<div class="col-md-3 col-6">
+		{{ template "branch" . }}
+	</div>
+
+	<div class="col-md-3 col-6 p-2">
+		<div>
+			<i class="fa fa-hashtag" aria-hidden="true"></i>
+			{{.Num}}
+		</div>
+		<div>
+			<i class="fa fa-calendar" aria-hidden="true"></i>
+			{{formatDate .UpdatedAt}}
+		</div>
+		<div>
+			<i class="fa fa-clock-o" aria-hidden="true"></i>
+			{{formatDuration .Duration}}
+		</div>
+	</div>
+
+	<div class="col-md-3 col-12 p-2 pl-3 pr-3 p-lg-2">
 		{{ template "message" . }}
 	</div>
 
@@ -398,45 +446,6 @@ var AddRepo = template.Must(template.Must(base.Clone()).Parse(`
 No installed repositories. Please <a href="/add">add a repository</a>.
 {{end}}
 {{end}}
-`))
-
-var jobRow = template.Must(base.Parse(`
-{{ define "jobRow" }}
-<div class="row">
-<div class="col-12">
-
-{{ template "headline" . }}
-
-<div class="row mt-md-2">
-
-	<div class="col-lg-3 col-6">
-		{{ template "branch" . }}
-	</div>
-
-	<div class="col-lg-3 col-6 p-2">
-		<div>
-			<i class="fa fa-hashtag" aria-hidden="true"></i>
-			{{.Num}}
-		</div>
-		<div>
-			<i class="fa fa-calendar" aria-hidden="true"></i>
-			{{formatDate .UpdatedAt}}
-		</div>
-		<div>
-			<i class="fa fa-clock-o" aria-hidden="true"></i>
-			{{formatDuration .Duration}}
-		</div>
-	</div>
-
-	<div class="col-lg-3 col-12 p-2 pl-3 pr-3 p-lg-2">
-		{{ template "message" . }}
-	</div>
-
-</div>
-
-</div>
-</div>
-{{ end }}
 `))
 
 var JobsList = template.Must(template.Must(base.Clone()).Parse(`
