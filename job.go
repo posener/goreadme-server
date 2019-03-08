@@ -350,4 +350,4 @@ func computeSHA(b []byte) string {
 	return plumbing.ComputeHash(plumbing.BlobObject, b).String()
 }
 
-const credits = "\nCreated by [goreadme](" + githubAppURL + ")\n"
+const credits = "\n\n---\n\nCreated by [goreadme](" + githubAppURL + ")\n"
