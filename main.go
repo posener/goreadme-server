@@ -9,7 +9,7 @@
 //
 // 1. Go to [https://github.com/apps/goreadme](https://github.com/apps/goreadme).
 // 2. Press the "Configure" button.
-// 3. choose your account, or an organization that owns the repository.
+// 3. Choose your account, or an organization that owns the repository.
 // 4. Review the permissions and provide access to goreadme to repositories.
 // 5. Click Save.
 //

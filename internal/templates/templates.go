@@ -131,7 +131,7 @@ var base = template.Must(html.Parse(`
 </nav>
 
 	<div class="container">
-	<!-- <h3>{{block "title" .}}{{end}}</h3> -->
+	<!-- <h4>{{block "title" .}}{{end}}</h4> -->
 
 	{{ if .Error }}
 		<div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -187,45 +187,74 @@ var base = template.Must(html.Parse(`
 var Home = template.Must(template.Must(base.Clone()).Parse(`
 {{define "title"}}Login{{end}}
 {{define "content"}}
-<div class="container h-75">
-	<div class="row align-items-center h-75">
-
-		<div class="col-lg-4 col-12 mx-auto">
-			<h3>Welcome</h3>
+<div class="container">
+	<div class="row">
+		<div class="col-lg-7 col-12 mx-auto">
+			<h4>Welcome</h4>
 			<p>
 				Goreadme is a Github app that automatically creates readme files from the Go doc of the project.
-				Please visit our <a href="https://github.com/apps/goreadme">Github app page</a> for more info.
+			</p>
+
+			<p>
+			<a href="github.com/posener/goreadme">goreadme</a> is a tool for creating README.md
+			files from Go doc of a given package.
+			This website is the Github app on top of this tool. It fully automates
+			the process of keeping the README.md file updated.
+			</p>
+			<h5>Usage</h5>
+			<lu>
+				<li>
+					Go to <a target="_blank" href="https://github.com/apps/goreadme">https://github.com/apps/goreadme</a>.
+				</li>
+				<li>Press the "Configure" button.</li>
+				<li>Choose your account, or an organization that owns the repository.</li>
+				<li>Review the permissions and provide access to goreadme to repositories.</li>
+				<li>Click Save</li>
+			</lu>
+			<p>
+			You should see PRs from goreadme bot in your Github repositories.
+			</p>
+			<h5>How does it Work?</h5>
+			<p>
+				Once integrated with a repository, goreadme is registered on a Github hook,
+				that calls goreadme server whenever the repository default branch is
+				modified. Goreadme then computes the new README.md file and compairs it
+				to the exiting one. If a change is needed, Goreadme will create a PR with
+				the new content of the README.md file.
 			</p>
 		</div>
+		<div class="col-lg-5 col-12">
 
 		{{ if not .User }}
-			<div class="col-lg-4 col-12 mx-auto">
-				<div class="jumbotron">
-					<p>
-					In order to use goreadme with your repository, login is required.
-					</p>
-					<form action="/auth/login">
-					<button type="submit" class="btn btn-outline-primary">
-						<i class="fa fa-x2 fa-github" aria-hidden="true"></i>
-						Login with Github
-					</button>
-					</form>
-				</div>
+			<div class="jumbotron text-center">
+				<h4>Login</h4>
+				<p>
+					In order to use goreadme with your Github repositories, login is required.
+				</p>
+				<form action="/auth/login">
+				<button type="submit" class="btn btn-outline-primary">
+					<i class="fa fa-x2 fa-github" aria-hidden="true"></i>
+					Login with Github
+				</button>
+				</form>
 			</div>
 		{{ end }}
 
-		<div class="col-lg-4 col-12 mx-auto list-group">
-			<h5>
-				<i class="fa fa-x2 fa-trophy"></i>
-				Top Open Source Projects
-			</h5>
-			<small class="p2 pl-2">Total: {{.Stats.TotalProjects}}</small>
-			{{ range .Stats.TopProjects }}
-				<a class="list-group-item list-group-item-action text-center" href="https://github.com/{{.Owner}}/{{.Repo}}">
-					{{.Owner}}/{{.Repo}}
-					<span class="badge badge-info">{{.Stars}} <i class="fa fa-star"></i></span>
-				</a>
-			{{ end }}
+			<div>
+				<h4>
+					<i class="fa fa-x2 fa-trophy"></i>
+					Top Open Source Projects
+				</h4>
+				<small class="p2 pl-2">Total: {{.Stats.TotalProjects}}</small>
+				<ul class="list-group">
+				{{ range .Stats.TopProjects }}
+					<a href="https://github.com/{{.Owner}}/{{.Repo}}" class="list-group-item d-flex justify-content-between align-items-center">
+						{{.Owner}}/{{.Repo}}
+						<span class="badge badge-info">{{.Stars}} <i class="fa fa-star"></i></span>
+					</a>
+				{{ end }}
+				</ul>
+			</div>
 		</div>
 
 	</div>
