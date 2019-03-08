@@ -254,11 +254,11 @@ var Home = template.Must(template.Must(base.Clone()).Parse(`
 				<h4 class="card-title">
 					Stats
 				</h4>
-				<h5 class="card-subtitle mb-2 text-muted">
+				<h5 class="card-subtitle p-2 text-muted">
 					<i class="fa fa-x2 fa-balance-scale"></i>
 					Total: {{.Stats.TotalProjects}}
 				</h5>
-				<h5 class="card-subtitle mb-2 text-muted">
+				<h5 class="card-subtitle p-2 text-muted">
 					<i class="fa fa-x2 fa-trophy"></i>
 					Top Open Source Goreadmes
 				</h5>
