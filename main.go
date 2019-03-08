@@ -29,8 +29,10 @@ package main
 
 import (
 	"context"
+	"flag"
+	"fmt"
 	"net/http"
-	"os"
+	"strconv"
 	"time"
 
 	"github.com/posener/goreadme-server/internal/googleanalytics"
@@ -38,6 +40,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
+	"github.com/kelseyhightower/envconfig"
 	"github.com/posener/goreadme-server/internal/auth"
 	"github.com/posener/goreadme-server/internal/githubapp"
 	"github.com/sirupsen/logrus"
@@ -45,37 +48,49 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
-var (
-	domain             = os.Getenv("DOMAIN")
-	port               = os.Getenv("PORT")
-	dbURL              = os.Getenv("DATABASE_URL")
-	sessionSecret      = os.Getenv("SESSION_SECRET")
-	githubAppID        = os.Getenv("GITHUB_APP_ID")
-	githubKey          = os.Getenv("GITHUB_KEY")
-	githubClientID     = os.Getenv("GITHUB_ID")
-	githubClientSecret = os.Getenv("GITHUB_SECRET")
-	debug              = os.Getenv("DEBUG_SERVER") == "1"
-)
+var cfg struct {
+	Domain           string `required:"true" split_words:"true"`
+	Port             int    `required:"true" split_words:"true"`
+	DatabaseURL      string `required:"true" split_words:"true"`
+	SessionSecret    string `required:"true" split_words:"true"`
+	GithubAppID      int    `required:"true" split_words:"true"`
+	GithubKey        string `required:"true" split_words:"true"`
+	GithubID         string `required:"true" split_words:"true"`
+	GithubSecret     string `required:"true" split_words:"true"`
+	GithubHookSecret string `required:"true" split_words:"true"`
+	Debug            bool   `default:"false" envconfig:"debug_server"`
+}
+
+func init() {
+	flag.Usage = func() {
+		envconfig.Usage("", &cfg)
+	}
+	flag.Parse()
+	err := envconfig.Process("", &cfg)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+}
 
 func main() {
 	ctx := context.Background()
-	if debug {
+	if cfg.Debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 
-	cfg := githubapp.Config{
-		AppID:      githubAppID,
-		PrivateKey: []byte(githubKey),
+	ghCfg := githubapp.Config{
+		AppID:      strconv.Itoa(cfg.GithubAppID),
+		PrivateKey: []byte(cfg.GithubKey),
 		Expires:    time.Second * 60 * 10,
 	}
 
-	client := cfg.Clients(ctx)
-	db, err := gorm.Open("postgres", dbURL)
+	client := ghCfg.Clients(ctx)
+	db, err := gorm.Open("postgres", cfg.DatabaseURL)
 	if err != nil {
-		logrus.Fatalf("Connect to DB on %s: %v", dbURL, err)
+		logrus.Fatalf("Connect to DB on %s: %v", cfg.DatabaseURL, err)
 	}
 	defer db.Close()
-	if debug {
+	if cfg.Debug {
 		db.LogMode(true)
 	}
 
@@ -84,10 +99,10 @@ func main() {
 	}
 
 	a := &auth.Auth{
-		SessionSecret: sessionSecret,
-		GithubID:      githubClientID,
-		GithubSecret:  githubClientSecret,
-		Domain:        domain,
+		SessionSecret: cfg.SessionSecret,
+		GithubID:      cfg.GithubID,
+		GithubSecret:  cfg.GithubSecret,
+		Domain:        cfg.Domain,
 		RedirectPath:  "/auth/callback",
 		LoginPath:     "/",
 		HomePath:      "/",
@@ -117,10 +132,10 @@ func main() {
 	googleanalytics.AddToRouter(m, "/analytics")
 
 	mh := handlers.RecoveryHandler(handlers.PrintRecoveryStack(true), handlers.RecoveryLogger(logrus.StandardLogger()))(m)
-	if debug {
+	if cfg.Debug {
 		mh = handlers.LoggingHandler(logrus.StandardLogger().Writer(), mh)
 	}
 
 	logrus.Infof("Starting server...")
-	http.ListenAndServe(":"+port, mh)
+	http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), mh)
 }

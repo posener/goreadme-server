@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/google/go-github/github"
@@ -18,10 +17,6 @@ import (
 	"github.com/posener/goreadme-server/internal/templates"
 	"github.com/sirupsen/logrus"
 )
-
-var githubHookSecret = []byte(os.Getenv("GITHUB_HOOK_SECRET")) // Secret for github hooks
-
-var githubAppIDInt, _ = strconv.Atoi(githubAppID)
 
 type handler struct {
 	auth   *auth.Auth

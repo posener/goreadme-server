@@ -14,7 +14,7 @@ import (
 
 // hook is called by github when there is a push to repository.
 func (h *handler) hook(w http.ResponseWriter, r *http.Request) {
-	payload, err := github.ValidatePayload(r, githubHookSecret)
+	payload, err := github.ValidatePayload(r, []byte(cfg.GithubHookSecret))
 	if err != nil {
 		logrus.Warnf("Unauthorized request: %s", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -28,7 +28,7 @@ func (h *handler) hook(w http.ResponseWriter, r *http.Request) {
 			logrus.Infof("Skipping push to non default branch %q", e.GetRef())
 			return
 		}
-		if e.GetInstallation().GetAppID() == int64(githubAppIDInt) {
+		if e.GetInstallation().GetAppID() == int64(cfg.GithubAppID) {
 			logrus.Infof("Skipping self push")
 			return
 		}
