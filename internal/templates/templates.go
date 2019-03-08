@@ -352,8 +352,8 @@ var projectRow = template.Must(base.Parse(`
 var Projects = template.Must(template.Must(base.Clone()).Parse(`
 {{define "title"}}Projects{{end}}
 {{define "content"}}
-<div class="row m-md-2">
-<div class="col-12">
+<div class="row m-md-2 justify-content-md-center">
+<div class="col-xl-8 col-lg-10 col-12">
 {{if .Projects}}
 		{{ range .Projects }}
 
@@ -443,8 +443,8 @@ var JobsList = template.Must(template.Must(base.Clone()).Parse(`
 {{define "title"}}Jobs List{{end}}
 {{define "content"}}
 
-<div class="row m-md-2">
-<div class="col-12">
+<div class="row m-md-2 justify-content-md-center">
+<div class="col-xl-8 col-lg-10 col-12">
 {{ if .Jobs }}
 		{{ range .Jobs }}
 
