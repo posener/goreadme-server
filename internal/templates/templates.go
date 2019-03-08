@@ -42,6 +42,7 @@ var html = template.Must(
   <title>Goreadme</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link rel="shortcut icon" type="image/png" href="https://raw.githubusercontent.com/posener/goreadme-server/master/media/favicon.ico"/>
 </head>
 <body>
 
@@ -72,7 +73,7 @@ var base = template.Must(html.Parse(`
 {{define "body"}}
 <nav class="navbar navbar-expand-md navbar-light bg-light">
 	<a class="navbar-brand abs" href="/">
-		<img src="https://raw.githubusercontent.com/posener/goreadme/master/icon.png" width="30" height="30" alt="">
+		<img src="https://raw.githubusercontent.com/posener/goreadme-server/master/media/icon.png" width="30" height="30" alt="">
 		Goreadme
 	</a>
 	{{ if .User }}
