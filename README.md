@@ -21,7 +21,7 @@ the process of keeping the README.md file updated.
 You should see PRs from goreadme bot in your github repos.
 
 For more features, or to trigger goreadme on demand to to
-[https://goreadme.herokuapp.com.](https://goreadme.herokuapp.com.)
+[https://goreadme.herokuapp.com](https://goreadme.herokuapp.com).
 
 ## How does it Work?
 
