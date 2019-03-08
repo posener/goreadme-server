@@ -13,6 +13,7 @@ import (
 
 	"github.com/bradleyfalzon/ghinstallation"
 	"github.com/google/go-github/github"
+	"github.com/patrickmn/go-cache"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
@@ -21,72 +22,60 @@ import (
 
 var defaultHeader = &jws.Header{Algorithm: "RS256", Typ: "JWT"}
 
-// Config is the configuration for using JWT to fetch tokens,
-// commonly known as "two-legged OAuth 2.0".
+// Config is the configuration for using JWT to fetch tokens.
 type Config struct {
 	AppID      string
 	PrivateKey []byte
 	Expires    time.Duration
 }
 
-func (c *Config) Clients(ctx context.Context) *GithubClients {
-	return &GithubClients{
-		cfg:          *c,
-		client:       oauth2.NewClient(ctx, oauth2.ReuseTokenSource(nil, jwtSource{ctx, c})),
-		userClients:  make(map[string]*http.Client),
-		userInstalls: make(map[string]int64),
-	}
-}
-
 type GithubClients struct {
-	cfg          Config
-	client       *http.Client
-	userClients  map[string]*http.Client
-	userInstalls map[string]int64
-	mu           sync.RWMutex
+	cfg       Config
+	appGithub *github.Client
+	// user clients are stored in cache.
+	cache     *cache.Cache
+	mu        sync.RWMutex
 }
 
-func (c *GithubClients) Client() *http.Client {
-	return c.client
+type User struct {
+	Client    *http.Client
+	Github    *github.Client
+	InstallID int64
 }
 
-func (c *GithubClients) GithubClient() *github.Client {
-	return github.NewClient(c.client)
+// Clients returns a struct that can provide user installation clients
+// for the given application.
+func (c *Config) Clients(ctx context.Context) *GithubClients {
+	cl := oauth2.NewClient(ctx, oauth2.ReuseTokenSource(nil, jwtSource{
+		ctx:     ctx,
+		appID:   c.AppID,
+		expires: c.Expires,
+		pk:      parseKey(c.PrivateKey),
+	}))
+	return &GithubClients{
+		cfg:       *c,
+		appGithub: github.NewClient(cl),
+		cache:     cache.New(5*time.Minute, 10*time.Minute),
+	}
 }
 
-func (c *GithubClients) InstallID(ctx context.Context, user string) (int64, error) {
+// User returns github installation client for a given user login.
+func (c *GithubClients) User(ctx context.Context, login string) (*User, error) {
+	if login == "" {
+		return nil, fmt.Errorf("empty login")
+	}
 	c.mu.RLock()
-	if id := c.userInstalls[user]; id != 0 {
+	if user, ok := c.cache.Get(login); ok {
 		c.mu.RUnlock()
-		return id, nil
+		return user.(*User), nil
 	}
 	c.mu.RUnlock()
+	logrus.Debugf("Creating new client for user: %s", login)
 
-	_, err := c.UserClient(ctx, user)
-	if err != nil {
-		return 0, err
-	}
-
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.userInstalls[user], nil
-}
-
-func (c *GithubClients) UserClient(ctx context.Context, user string) (*http.Client, error) {
-	c.mu.RLock()
-	if cl := c.userClients[user]; cl != nil {
-		c.mu.RUnlock()
-		return cl, nil
-	}
-	c.mu.RUnlock()
-	logrus.Debugf("Creating new client for user: %s", user)
-
-	inst, _, err := github.NewClient(c.client).Apps.FindUserInstallation(ctx, user)
+	inst, _, err := c.appGithub.Apps.FindUserInstallation(ctx, login)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed getting user installation")
 	}
-
-	logrus.Debugf("Got installation %+v for client %s", inst, user)
 
 	appID, _ := strconv.Atoi(c.cfg.AppID)
 	tr, err := ghinstallation.New(http.DefaultTransport, appID, int(inst.GetID()), c.cfg.PrivateKey)
@@ -94,52 +83,40 @@ func (c *GithubClients) UserClient(ctx context.Context, user string) (*http.Clie
 		return nil, errors.Wrap(err, "get install transport")
 	}
 
+	cl := &http.Client{Transport: tr}
+	user := &User{
+		Client:    cl,
+		Github:    github.NewClient(cl),
+		InstallID: inst.GetID(),
+	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.userClients[user] = &http.Client{Transport: tr}
-	c.userInstalls[user] = inst.GetID()
-	return c.userClients[user], nil
-}
-
-func (c *GithubClients) UserGithubClient(ctx context.Context, user string) (*github.Client, error) {
-	cl, err := c.UserClient(ctx, user)
-	if err != nil {
-		return nil, err
-	}
-	return github.NewClient(cl), nil
+	c.cache.SetDefault(login, user)
+	return user, nil
 }
 
 // jwtSource is a source that always does a signed JWT request for a token.
 // It should typically be wrapped with a reuseTokenSource.
 type jwtSource struct {
-	ctx  context.Context
-	conf *Config
+	ctx     context.Context
+	appID   string
+	expires time.Duration
+	pk      *rsa.PrivateKey
 }
 
 func (js jwtSource) Token() (*oauth2.Token, error) {
-	pk, err := parseKey(js.conf.PrivateKey)
-	if err != nil {
-		return nil, err
-	}
-	// hc := oauth2.NewClient(js.ctx, nil)
-	claimSet := &jws.ClaimSet{
-		Iss: js.conf.AppID,
-	}
-	if t := js.conf.Expires; t > 0 {
-		claimSet.Exp = time.Now().Add(t).Unix()
-	}
+	exp := time.Now().Add(js.expires)
+	claimSet := &jws.ClaimSet{Iss: js.appID, Exp: exp.Unix()}
 	h := *defaultHeader
-	payload, err := jws.Encode(&h, claimSet, pk)
+	payload, err := jws.Encode(&h, claimSet, js.pk)
 	if err != nil {
 		return nil, err
 	}
-
-	logrus.Debugf("Got payload: %s", string(payload))
-
-	return &oauth2.Token{TokenType: "bearer", AccessToken: payload}, nil
+	logrus.Infof("Using new application token")
+	return &oauth2.Token{TokenType: "bearer", AccessToken: payload, Expiry: exp}, nil
 }
 
-func parseKey(key []byte) (*rsa.PrivateKey, error) {
+func parseKey(key []byte) *rsa.PrivateKey {
 	block, _ := pem.Decode(key)
 	if block != nil {
 		key = block.Bytes
@@ -148,12 +125,12 @@ func parseKey(key []byte) (*rsa.PrivateKey, error) {
 	if err != nil {
 		parsedKey, err = x509.ParsePKCS1PrivateKey(key)
 		if err != nil {
-			return nil, fmt.Errorf("private key should be a PEM or plain PKCS1 or PKCS8; parse error: %v", err)
+			panic(fmt.Errorf("private key should be a PEM or plain PKCS1 or PKCS8; parse error: %v", err))
 		}
 	}
 	parsed, ok := parsedKey.(*rsa.PrivateKey)
 	if !ok {
-		return nil, errors.New("private key is invalid")
+		panic("private key is invalid")
 	}
-	return parsed, nil
+	return parsed
 }

@@ -111,15 +111,12 @@ func tryPullRequest(payload []byte) *github.PullRequestEvent {
 }
 
 func (h *handler) runJob(ctx context.Context, p *Project) (done <-chan struct{}, jobNum int, err error) {
-	cl, err := h.github.UserClient(ctx, p.Owner)
+	user, err := h.github.User(ctx, p.Owner)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "failed getting user client: %s")
-		return
 	}
 
-	gh := github.NewClient(cl)
-
-	repo, _, err := gh.Repositories.Get(ctx, p.Owner, p.Repo)
+	repo, _, err := user.Github.Repositories.Get(ctx, p.Owner, p.Repo)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "failed getting repo data")
 	}
@@ -129,7 +126,7 @@ func (h *handler) runJob(ctx context.Context, p *Project) (done <-chan struct{},
 
 	// Update Head SHA if was not given.
 	if p.HeadSHA == "" {
-		gitData, _, err := gh.Git.GetRef(ctx, p.Owner, p.Repo, "refs/heads/"+p.DefaultBranch)
+		gitData, _, err := user.Github.Git.GetRef(ctx, p.Owner, p.Repo, "refs/heads/"+p.DefaultBranch)
 		if err != nil {
 			return nil, 0, errors.Wrap(err, "failed getting git data")
 		}
@@ -139,8 +136,8 @@ func (h *handler) runJob(ctx context.Context, p *Project) (done <-chan struct{},
 	j := &Job{
 		Project:  *p,
 		db:       h.db,
-		github:   gh,
-		goreadme: goreadme.New(cl),
+		github:   user.Github,
+		goreadme: goreadme.New(user.Client),
 	}
 	done, jobNum = j.Run()
 	return done, jobNum, nil

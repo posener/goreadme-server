@@ -44,6 +44,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
 	github.com/openzipkin/zipkin-go v0.1.5 // indirect
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.8.1
 	github.com/posener/goreadme v0.0.0-20190308105944-03ba46d3fad7
 	github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90 // indirect
@@ -80,6 +81,7 @@ require (
 	golang.org/x/sys v0.0.0-20190302025703-b6889370fb10 // indirect
 	golang.org/x/tools v0.0.0-20190228203856-589c23e65e65 // indirect
 	google.golang.org/genproto v0.0.0-20190227213309-4f5b463f9597 // indirect
+	gopkg.in/src-d/go-git.v4 v4.10.0 // indirect
 	honnef.co/go/tools v0.0.0-20190215041234-466a0476246c // indirect
 	sourcegraph.com/sqs/pbtypes v1.0.0 // indirect
 )

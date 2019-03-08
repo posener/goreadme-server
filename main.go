@@ -90,7 +90,7 @@ func main() {
 	ghCfg := githubapp.Config{
 		AppID:      strconv.Itoa(cfg.GithubAppID),
 		PrivateKey: []byte(cfg.GithubKey),
-		Expires:    time.Second * 60 * 10,
+		Expires:    time.Second * 10 * 60,
 	}
 
 	client := ghCfg.Clients(ctx)

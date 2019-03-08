@@ -41,23 +41,39 @@ type stats struct {
 	TotalProjects int
 }
 
-func (h *handler) dataFromRequest(w http.ResponseWriter, r *http.Request) *templateData {
-	var (
-		data templateData
-		err  error
-	)
-	data.User = h.auth.User(r)
-	data.InstallID, err = h.github.InstallID(r.Context(), data.User.GetLogin())
-	if err != nil {
-		logrus.Warnf("Failed getting install ID: %s", err)
+type contextKey string
+
+const contextClient contextKey = "client"
+
+func client(r *http.Request) *githubapp.User {
+	if client := r.Context().Value(contextClient); client != nil {
+		return client.(*githubapp.User)
 	}
-	data.Error = r.URL.Query().Get("error")
+	return nil
+}
+
+func (h *handler) dataFromRequest(w http.ResponseWriter, r *http.Request) *templateData {
+	data := templateData{
+		Error: r.URL.Query().Get("error"),
+		User:  h.auth.User(r),
+	}
+	if data.User != nil {
+		login := data.User.GetLogin()
+		userClient, err := h.github.User(r.Context(), login)
+		if err != nil {
+			logrus.Warnf("Failed getting install ID for login %s: %s", login, err)
+			data.User = nil
+		} else {
+			data.InstallID = userClient.InstallID
+			r = r.WithContext(context.WithValue(r.Context(), contextClient, userClient))
+		}
+	}
 	return &data
 }
 
 func (h *handler) home(w http.ResponseWriter, r *http.Request) {
 	data := h.dataFromRequest(w, r)
-	// nil data is valid here.
+	// nil user is valid here.
 
 	err := h.db.Model(&Project{}).Where("private = FALSE").Order("stars DESC").Scan(&data.Stats.TopProjects).Limit(10).Error
 	if err != nil {
@@ -81,7 +97,7 @@ func (h *handler) home(w http.ResponseWriter, r *http.Request) {
 
 func (h *handler) projectsList(w http.ResponseWriter, r *http.Request) {
 	data := h.dataFromRequest(w, r)
-	if data == nil {
+	if data.User == nil {
 		return
 	}
 
@@ -103,7 +119,7 @@ func (h *handler) projectsList(w http.ResponseWriter, r *http.Request) {
 
 func (h *handler) jobsList(w http.ResponseWriter, r *http.Request) {
 	data := h.dataFromRequest(w, r)
-	if data == nil {
+	if data.User == nil {
 		return
 	}
 
@@ -124,17 +140,11 @@ func (h *handler) jobsList(w http.ResponseWriter, r *http.Request) {
 
 func (h *handler) addRepo(w http.ResponseWriter, r *http.Request) {
 	data := h.dataFromRequest(w, r)
-	if data == nil {
+	if data.User == nil {
 		return
 	}
 
-	gh, err := h.github.UserGithubClient(r.Context(), data.User.GetLogin())
-	if err != nil {
-		h.doError(w, r, errors.Wrap(err, "failed getting github client"))
-		return
-	}
-
-	repos, _, err := gh.Apps.ListRepos(r.Context(), nil)
+	repos, _, err := client(r).Github.Apps.ListRepos(r.Context(), nil)
 	if err != nil {
 		h.doError(w, r, errors.Wrap(err, "failed getting repos"))
 		return
@@ -149,7 +159,7 @@ func (h *handler) addRepo(w http.ResponseWriter, r *http.Request) {
 
 func (h *handler) addRepoAction(w http.ResponseWriter, r *http.Request) {
 	data := h.dataFromRequest(w, r)
-	if data == nil {
+	if data.User == nil {
 		return
 	}
 
