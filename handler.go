@@ -62,10 +62,9 @@ func (h *handler) dataFromRequest(w http.ResponseWriter, r *http.Request) *templ
 		userClient, err := h.github.User(r.Context(), login)
 		if err != nil {
 			logrus.Warnf("Failed getting install ID for login %s: %s", login, err)
-			data.User = nil
 		} else {
 			data.InstallID = userClient.InstallID
-			r = r.WithContext(context.WithValue(r.Context(), contextClient, userClient))
+			*r = *r.WithContext(context.WithValue(r.Context(), contextClient, userClient))
 		}
 	}
 	return &data
@@ -144,14 +143,15 @@ func (h *handler) addRepo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	repos, _, err := client(r).Github.Apps.ListRepos(r.Context(), nil)
-	if err != nil {
-		h.doError(w, r, errors.Wrap(err, "failed getting repos"))
-		return
+	if c := client(r); c != nil {
+		repos, _, err := c.Github.Apps.ListRepos(r.Context(), nil)
+		if err != nil {
+			h.doError(w, r, errors.Wrap(err, "failed getting repos"))
+			return
+		}
+		data.Repos = repos
 	}
-
-	data.Repos = repos
-	err = templates.AddRepo.Execute(w, data)
+	err := templates.AddRepo.Execute(w, data)
 	if err != nil {
 		h.doError(w, r, errors.Wrap(err, "failed executing template"))
 	}

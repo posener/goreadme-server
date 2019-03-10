@@ -101,7 +101,7 @@ var base = template.Must(html.Parse(`
 					</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link" href="https://github.com/settings/installations/{{.InstallID}}">
+					<a class="nav-link" href="https://github.com{{if .InstallID}}/settings/installations/{{.InstallID}}{{else}}/apps/goreadme/installations/new{{end}}">
 						<i class="fa fa-wrench" aria-hidden="true"></i>
 						Manage Integration
 					</a>
