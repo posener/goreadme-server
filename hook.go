@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -24,8 +25,9 @@ func (h *handler) hook(w http.ResponseWriter, r *http.Request) {
 	// Handle different events
 	if e := tryPush(payload); e != nil {
 		logrus.Info("Push hook triggered")
-		if branchOfRef(e.GetRef()) != e.GetRepo().GetDefaultBranch() {
-			logrus.Infof("Skipping push to non default branch %q", e.GetRef())
+		branch := branchOfRef(e.GetRef())
+		if branch != e.GetRepo().GetDefaultBranch() {
+			logrus.Infof("Skipping push to non default branch %q", branch)
 			return
 		}
 		if e.GetInstallation().GetAppID() == int64(cfg.GithubAppID) {
@@ -37,7 +39,7 @@ func (h *handler) hook(w http.ResponseWriter, r *http.Request) {
 			Owner:   e.GetRepo().GetOwner().GetName(),
 			Repo:    e.GetRepo().GetName(),
 			HeadSHA: e.GetHeadCommit().GetID(),
-		})
+		}, fmt.Sprintf("Push to %s", branch))
 	} else if e := tryInstall(payload); e != nil {
 		logrus.Infof("Install hook triggered added=%d removed=%d", len(e.RepositoriesAdded), len(e.RepositoriesRemoved))
 		for _, repo := range e.RepositoriesRemoved {
@@ -49,7 +51,7 @@ func (h *handler) hook(w http.ResponseWriter, r *http.Request) {
 				Install: e.GetInstallation().GetID(),
 				Owner:   parts[0],
 				Repo:    parts[1],
-			})
+			}, "New Install")
 		}
 	} else if e := tryPullRequest(payload); e != nil {
 		if e.GetAction() != "closed" || !e.GetPullRequest().GetMerged() {
@@ -65,7 +67,7 @@ func (h *handler) hook(w http.ResponseWriter, r *http.Request) {
 			Owner:         e.GetRepo().GetOwner().GetLogin(),
 			Repo:          e.GetRepo().GetName(),
 			DefaultBranch: e.GetRepo().GetDefaultBranch(),
-		})
+		}, fmt.Sprintf("PR#%d", e.GetPullRequest().GetNumber()))
 	} else {
 		logrus.Warnf("Got unexpected payload: %s", string(payload))
 	}
@@ -110,7 +112,7 @@ func tryPullRequest(payload []byte) *github.PullRequestEvent {
 	return &e
 }
 
-func (h *handler) runJob(ctx context.Context, p *Project) (done <-chan struct{}, jobNum int, err error) {
+func (h *handler) runJob(ctx context.Context, p *Project, trigger string) (done <-chan struct{}, jobNum int, err error) {
 	user, err := h.github.User(ctx, p.Owner)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "failed getting user client: %s")
@@ -135,6 +137,7 @@ func (h *handler) runJob(ctx context.Context, p *Project) (done <-chan struct{},
 
 	j := &Job{
 		Project:  *p,
+		Trigger:  trigger,
 		db:       h.db,
 		github:   user.Github,
 		goreadme: goreadme.New(user.Client),

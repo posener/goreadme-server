@@ -173,7 +173,7 @@ func (h *handler) addRepoAction(w http.ResponseWriter, r *http.Request) {
 		Owner:   owner,
 		Repo:    repo,
 		Install: data.InstallID,
-	})
+	}, "Manual")
 	if err != nil {
 		h.doError(w, r, err)
 		return
@@ -220,7 +220,7 @@ func (h *handler) debugPR() {
 		Repo:          os.Getenv("REPO"),
 		HeadSHA:       os.Getenv("HEAD"),
 		DefaultBranch: "master",
-	})
+	}, "Debug")
 	if err != nil {
 		logrus.Errorf("Failed job: %s", err)
 		os.Exit(1)

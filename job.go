@@ -51,6 +51,7 @@ type Job struct {
 	Num      int `gorm:"primary_key"`
 	Duration time.Duration
 	Debug    string
+	Trigger  string
 
 	db       *gorm.DB
 	github   *github.Client

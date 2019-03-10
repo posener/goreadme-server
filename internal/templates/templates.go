@@ -316,9 +316,9 @@ var branch = template.Must(base.Parse(`
 <div>
 	<a href="https://github.com/{{.Owner}}/{{.Repo}}/tree/{{.DefaultBranch}}">{{.DefaultBranch}}</a>
 </div>
-<div><small>
+<div>
 	<a href="https://github.com/{{.Owner}}/{{.Repo}}/commits/{{.HeadSHA}}">{{sha .HeadSHA}}</a>
-</small></div>
+</div>
 
 {{ end }}
 `))
@@ -376,6 +376,11 @@ var jobRow = template.Must(base.Parse(`
 
 	<div class="col-md-3 col-6">
 		{{ template "branch" . }}
+		{{ if .Trigger }}
+		<div>
+			<i aria-hidden="true" class="fa fa-key"></i>{{ .Trigger }}
+		</div>
+		{{ end }}
 	</div>
 
 	<div class="col-md-3 col-6 p-2">

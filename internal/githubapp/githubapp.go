@@ -13,7 +13,7 @@ import (
 
 	"github.com/bradleyfalzon/ghinstallation"
 	"github.com/google/go-github/github"
-	"github.com/patrickmn/go-cache"
+	cache "github.com/patrickmn/go-cache"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
@@ -33,8 +33,8 @@ type GithubClients struct {
 	cfg       Config
 	appGithub *github.Client
 	// user clients are stored in cache.
-	cache     *cache.Cache
-	mu        sync.RWMutex
+	cache *cache.Cache
+	mu    sync.RWMutex
 }
 
 type User struct {
