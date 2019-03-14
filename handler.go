@@ -13,7 +13,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"github.com/posener/goreadme-server/internal/auth"
-	"github.com/posener/goreadme-server/internal/githubapp"
+	"github.com/posener/githubapp"
 	"github.com/posener/goreadme-server/internal/templates"
 	"github.com/sirupsen/logrus"
 )
@@ -21,12 +21,12 @@ import (
 type handler struct {
 	auth   *auth.Auth
 	db     *gorm.DB
-	github *githubapp.GithubClients
+	github *githubapp.App
 }
 
 type templateData struct {
 	User      *github.User
-	InstallID int64
+	InstallID int
 	Repos     []*github.Repository
 	Projects  []Project
 	Jobs      []Job
@@ -45,13 +45,6 @@ type contextKey string
 
 const contextClient contextKey = "client"
 
-func client(r *http.Request) *githubapp.User {
-	if client := r.Context().Value(contextClient); client != nil {
-		return client.(*githubapp.User)
-	}
-	return nil
-}
-
 func (h *handler) dataFromRequest(w http.ResponseWriter, r *http.Request) *templateData {
 	data := templateData{
 		Error: r.URL.Query().Get("error"),
@@ -59,11 +52,11 @@ func (h *handler) dataFromRequest(w http.ResponseWriter, r *http.Request) *templ
 	}
 	if data.User != nil {
 		login := data.User.GetLogin()
-		userClient, err := h.github.User(r.Context(), login)
+		userClient, err := h.github.Installation(r.Context(), login)
 		if err != nil {
 			logrus.Warnf("Failed getting install ID for login %s: %s", login, err)
 		} else {
-			data.InstallID = userClient.InstallID
+			data.InstallID = userClient.ID
 			*r = *r.WithContext(context.WithValue(r.Context(), contextClient, userClient))
 		}
 	}
@@ -143,15 +136,18 @@ func (h *handler) addRepo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if c := client(r); c != nil {
-		repos, _, err := c.Github.Apps.ListRepos(r.Context(), nil)
-		if err != nil {
-			h.doError(w, r, errors.Wrap(err, "failed getting repos"))
-			return
-		}
-		data.Repos = repos
+	c, err := h.github.Installation(r.Context(), data.User.GetLogin())
+	if err != nil {
+		h.doError(w, r, errors.Wrap(err, "get installation client"))
+		return
 	}
-	err := templates.AddRepo.Execute(w, data)
+	repos, _, err := c.Github.Apps.ListRepos(r.Context(), nil)
+	if err != nil {
+		h.doError(w, r, errors.Wrap(err, "failed getting repos"))
+		return
+	}
+	data.Repos = repos
+	err = templates.AddRepo.Execute(w, data)
 	if err != nil {
 		h.doError(w, r, errors.Wrap(err, "failed executing template"))
 	}
@@ -172,7 +168,7 @@ func (h *handler) addRepoAction(w http.ResponseWriter, r *http.Request) {
 	_, jobNum, err := h.runJob(r.Context(), &Project{
 		Owner:   owner,
 		Repo:    repo,
-		Install: data.InstallID,
+		Install: int64(data.InstallID),
 	}, "Manual")
 	if err != nil {
 		h.doError(w, r, err)

@@ -51,7 +51,8 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/posener/goreadme-server/internal/auth"
-	"github.com/posener/goreadme-server/internal/githubapp"
+	"github.com/posener/githubapp"
+	"github.com/posener/githubapp/cache"
 	"github.com/sirupsen/logrus"
 
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -90,10 +91,9 @@ func main() {
 	ghCfg := githubapp.Config{
 		AppID:      strconv.Itoa(cfg.GithubAppID),
 		PrivateKey: []byte(cfg.GithubKey),
-		Expires:    time.Second * 10 * 60,
 	}
 
-	client := ghCfg.Clients(ctx)
+	client := ghCfg.NewApp(ctx, githubapp.OptWithCache(cache.New(time.Minute*5, time.Minute*10)))
 	db, err := gorm.Open("postgres", cfg.DatabaseURL)
 	if err != nil {
 		logrus.Fatalf("Connect to DB on %s: %v", cfg.DatabaseURL, err)

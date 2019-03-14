@@ -7,7 +7,6 @@ require (
 	github.com/denisenkom/go-mssqldb v0.0.0-20190204142019-df6d76eb9289 // indirect
 	github.com/dghubble/gologin v2.1.0+incompatible
 	github.com/dghubble/sessions v0.0.0-20181125211001-989de1d9988d
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/gofrs/uuid v3.2.0+incompatible // indirect
@@ -25,6 +24,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.8.1
+	github.com/posener/githubapp v0.0.0-20190314201433-b7d3d766c23d
 	github.com/posener/goreadme v0.0.0-20190308105944-03ba46d3fad7
 	github.com/sirupsen/logrus v1.3.0
 	github.com/src-d/go-git v4.7.0+incompatible
