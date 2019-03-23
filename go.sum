@@ -112,8 +112,16 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/posener/githubapp v0.0.0-20190314201433-b7d3d766c23d h1:5Hwj8z6wp9IDGaWh/FzaW/Vg8NqrznyHivIEY1fbBNw=
 github.com/posener/githubapp v0.0.0-20190314201433-b7d3d766c23d/go.mod h1:7BVTuYqM5R7K3GKfIRY+vR4ShATo+IHg6Ks4pDrtBn4=
+github.com/posener/githubapp v0.0.0-20190314204228-33d05bf47389 h1:HRE98rGcSt6ds6F/NyFxEu6V5vmmxEY15nsSNuy1UlI=
+github.com/posener/githubapp v0.0.0-20190314204228-33d05bf47389/go.mod h1:7BVTuYqM5R7K3GKfIRY+vR4ShATo+IHg6Ks4pDrtBn4=
 github.com/posener/goreadme v0.0.0-20190308105944-03ba46d3fad7 h1:Q3i0SSgJ5moObkzFEBDoadv5cgdt8SyX2B3E6ayLmJc=
 github.com/posener/goreadme v0.0.0-20190308105944-03ba46d3fad7/go.mod h1:ftiMo9ZqMCxjRWgTTlvDA4H1ZjMzs6gu+O7wqawAyvM=
+github.com/posener/goreadme v1.0.0 h1:InhrHXuI2DRpb7EaSjepMZWDR0UuLor4QwElWeJkm1I=
+github.com/posener/goreadme v1.0.0/go.mod h1:ftiMo9ZqMCxjRWgTTlvDA4H1ZjMzs6gu+O7wqawAyvM=
+github.com/posener/goreadme v1.1.0 h1:4abfnays448p4e7cejf5pdarIWh62mP/JIYNl/PJFac=
+github.com/posener/goreadme v1.1.0/go.mod h1:ftiMo9ZqMCxjRWgTTlvDA4H1ZjMzs6gu+O7wqawAyvM=
+github.com/posener/goreadme v1.1.2 h1:j9Ezs2NWJ0r+NRPMMY6EymqcyZouh8PMDBXJkGv6awM=
+github.com/posener/goreadme v1.1.2/go.mod h1:ftiMo9ZqMCxjRWgTTlvDA4H1ZjMzs6gu+O7wqawAyvM=
 github.com/prometheus/client_golang v0.8.0/go.mod h1:7SWBe2y4D6OKWSNQJUaRYU/AaXPKyh/dDVn+NZz0KFw=
 github.com/prometheus/client_model v0.0.0-20180712105110-5c3871d89910/go.mod h1:MbSGuTsp3dbXC40dX6PRTWyKYBIrTGTE9sqQNg2J8bo=
 github.com/prometheus/common v0.0.0-20180801064454-c7de2306084e/go.mod h1:daVV7qP5qjZbuso7PdcryaAu0sAZbrN9i7WWcTMWvro=
