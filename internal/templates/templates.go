@@ -164,7 +164,7 @@ var base = template.Must(html.Parse(`
 				Using free <a href="https://fontawesome.com">Font Awesome</a>
 			</li>
 		</ul>
-		<p>Designed anb built by Eyal Posener / 2019</p>
+		<p>Designed and built by Eyal Posener / 2019</p>
 		<ul class="list-inline">
 			<li class="list-inline-item"><a href="https://github.com/posener/goreadme">
 				<i class="fa fa-github" aria-hidden="true"></i>
