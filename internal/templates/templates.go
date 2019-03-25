@@ -222,7 +222,7 @@ var Home = template.Must(template.Must(base.Clone()).Parse(`
 			Genrating the readme file can also be triggered manually <a href="/projects">here</a>.
 		</p>
 		<p>
-			Goreadme service uses <a href="github.com/posener/goreadme">goreadme</a> - is a tool
+			Goreadme service uses <a href="https://github.com/posener/goreadme">goreadme</a> - is a tool
 			created by the service author, for generating README.md files from Go doc of a given package.
 		</p>
 		<h5>Customization</h5>
