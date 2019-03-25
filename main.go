@@ -1,6 +1,6 @@
 // Package main is an HTTP server that works with Github hooks.
 //
-// Goreadme (https://github.com/posener/goreadme) is a tool for creating README.md
+// (Goreadme) https://github.com/posener/goreadme is a tool for creating README.md
 // files from Go doc of a given package.
 // This project is the Github app on top of this tool. It fully automates
 // the process of keeping the README.md file updated.
@@ -18,8 +18,8 @@
 // 5. Click Save.
 //
 // You should see PRs from goreadme bot in your github repos.
-// For more features, or to trigger goreadme on demand to to
-// https://goreadme.herokuapp.com.
+// For more features, or to trigger goreadme on demand, use the
+// (Goreadme website) https://goreadme.herokuapp.com.
 //
 // How does it Work
 //
@@ -33,7 +33,7 @@
 //
 // Adding a `goreadme.json` file to your repository main directory can enable some
 // customization to the generated readme file. The configuration is available
-// according to https://godoc.org/github.com/posener/goreadme#Config.
+// according to (goreadme.Config struct) https://godoc.org/github.com/posener/goreadme#Config.
 package main
 
 import (
