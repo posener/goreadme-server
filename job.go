@@ -156,7 +156,7 @@ func (j *Job) runInBackground(done chan<- struct{}) {
 // done saves the job and project state once it is done.
 func (j *Job) done(err error, format string, args ...interface{}) {
 	j.Message = fmt.Sprintf(format, args...)
-	j.Status = "Success"
+	j.Status = "Pending"
 	j.Duration = time.Now().Sub(j.start)
 	if err != nil {
 		j.Status = "Failed"

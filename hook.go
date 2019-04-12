@@ -71,13 +71,9 @@ func (h *handler) hook(w http.ResponseWriter, r *http.Request) {
 
 		// Check if this is PR created by readme and update state.
 		var p Project
-		if err := h.db.Model(&p).Where("owner = ? AND repo = ? AND pr = ?", owner, repo, prNum).First(&p).Error; err == nil {
-			p.Status = "Merged"
-			if err := h.db.Save(&p).Error; err != nil {
-				logrus.Errorf("Failed saving project %s/%s status: %s.", p.Owner, p.Repo, err)
-			} else {
-				logrus.Infof("Updated project %s/%s state to merged.", p.Owner, p.Repo)
-			}
+		update := h.db.Model(&Project{}).Where("owner = ? AND repo = ? AND pr = ?", owner, repo, prNum).Update("status", "Merged")
+		if update.RowsAffected > 0 {
+			logrus.Infof("Updated project %s/%s state to merged.", p.Owner, p.Repo)
 			return
 		}
 

@@ -27,7 +27,7 @@ var html = template.Must(
 				switch status {
 				case "Failed":
 					return "danger"
-				case "Success":
+				case "Success", "Merged":
 					return "success"
 				default:
 					return "warning"
@@ -266,6 +266,7 @@ var Home = template.Must(template.Must(base.Clone()).Parse(`
 				{{ range .Stats.TopProjects }}
 					<a href="https://github.com/{{.Owner}}/{{.Repo}}" class="list-group-item d-flex justify-content-between align-items-center">
 						{{.Owner}}/{{.Repo}}
+						<span class="badge badge-{{color .Status}}">{{.Status}} <i class="fa fa-star"></i></span>
 						<span class="badge badge-info">{{.Stars}} <i class="fa fa-star"></i></span>
 					</a>
 				{{ end }}
@@ -484,7 +485,7 @@ var Badge = template.Must(template.New("svg").Funcs(
 	template.FuncMap{
 		"statusColor": func(s string) string {
 			switch s {
-			case "Success":
+			case "Success", "Merged":
 				return "#2ecc71"
 			case "Failed":
 				return "#d35400"
