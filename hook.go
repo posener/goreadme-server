@@ -62,12 +62,31 @@ func (h *handler) hook(w http.ResponseWriter, r *http.Request) {
 			logrus.Infof("Skipping merge to non-default branch: %s", ref)
 			return
 		}
+
+		var (
+			owner = e.GetRepo().GetOwner().GetLogin()
+			repo  = e.GetRepo().GetName()
+			prNum = e.GetPullRequest().GetNumber()
+		)
+
+		// Check if this is PR created by readme and update state.
+		var p Project
+		if err := h.db.Model(&p).Where("owner = ? AND repo = ? AND pr = ?", owner, repo, prNum).First(&p).Error; err == nil {
+			p.Status = "Merged"
+			if err := h.db.Save(&p).Error; err != nil {
+				logrus.Errorf("Failed saving project %s/%s status: %s.", p.Owner, p.Repo, err)
+			} else {
+				logrus.Infof("Updated project %s/%s state to merged.", p.Owner, p.Repo)
+			}
+			return
+		}
+
 		h.runJob(r.Context(), &Project{
 			Install:       e.GetInstallation().GetID(),
-			Owner:         e.GetRepo().GetOwner().GetLogin(),
-			Repo:          e.GetRepo().GetName(),
+			Owner:         owner,
+			Repo:          repo,
 			DefaultBranch: e.GetRepo().GetDefaultBranch(),
-		}, fmt.Sprintf("PR#%d", e.GetPullRequest().GetNumber()))
+		}, fmt.Sprintf("PR#%d", prNum))
 	} else {
 		logrus.Warnf("Got unexpected payload: %s", string(payload))
 	}
