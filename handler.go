@@ -67,7 +67,7 @@ func (h *handler) home(w http.ResponseWriter, r *http.Request) {
 	data := h.dataFromRequest(w, r)
 	// nil user is valid here.
 
-	err := h.db.Model(&Project{}).Where("private = FALSE").Order("stars DESC").Scan(&data.Stats.TopProjects).Limit(10).Error
+	err := h.db.Model(&Project{}).Where("private = FALSE").Order("stars DESC").Limit(10).Scan(&data.Stats.TopProjects).Error
 	if err != nil {
 		logrus.Errorf("Failed scanning open source projects: %s", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
