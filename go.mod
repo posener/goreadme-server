@@ -25,7 +25,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.8.1
 	github.com/posener/githubapp v0.0.0-20190314204228-33d05bf47389
-	github.com/posener/goreadme v1.1.5
+	github.com/posener/goreadme v1.1.6
 	github.com/sirupsen/logrus v1.3.0
 	github.com/src-d/go-git v4.7.0+incompatible
 	golang.org/x/crypto v0.0.0-20190228161510-8dd112bcdc25 // indirect
