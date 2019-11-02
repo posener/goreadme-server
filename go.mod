@@ -10,6 +10,7 @@ require (
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/gofrs/uuid v3.2.0+incompatible // indirect
+	github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2 // indirect
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/gorilla/handlers v1.4.0
 	github.com/gorilla/mux v1.7.0
@@ -25,7 +26,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.8.1
 	github.com/posener/githubapp v0.0.0-20190314204228-33d05bf47389
-	github.com/posener/goreadme v1.1.7
+	github.com/posener/goreadme v1.1.8
 	github.com/sirupsen/logrus v1.3.0
 	github.com/src-d/go-git v4.7.0+incompatible
 	golang.org/x/crypto v0.0.0-20190228161510-8dd112bcdc25 // indirect
@@ -35,3 +36,5 @@ require (
 	golang.org/x/tools v0.0.0-20190228203856-589c23e65e65 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )
+
+go 1.13

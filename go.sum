@@ -44,6 +44,8 @@ github.com/gofrs/uuid v3.2.0+incompatible/go.mod h1:b2aQJv3Z4Fp6yNu3cdSllBxTCLRx
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/golang/gddo v0.0.0-20190301051549-9dbec5838451 h1:/+FTYQ7GtjCMEEAT7LO59rlG7IvLhtLhiHf/IpZ8xiM=
 github.com/golang/gddo v0.0.0-20190301051549-9dbec5838451/go.mod h1:xEhNfoBDX1hzLm2Nf80qUvZ2sVwoMZ8d6IE2SrsQfh4=
+github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2 h1:xisWqjiKEff2B0KfFYGpCqc3M3zdTz+OHQHRc09FeYk=
+github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2/go.mod h1:xEhNfoBDX1hzLm2Nf80qUvZ2sVwoMZ8d6IE2SrsQfh4=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/lint v0.0.0-20180702182130-06c8688daad7/go.mod h1:tluoj9z5200jBnyusfRPU2LqT6J+DAorxEvtC7LHB+E=
 github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
@@ -132,6 +134,8 @@ github.com/posener/goreadme v1.1.6 h1:Anl8ec/pxrBxU17VxBVgrz7MhZUSetV0YodQeltHEU
 github.com/posener/goreadme v1.1.6/go.mod h1:ftiMo9ZqMCxjRWgTTlvDA4H1ZjMzs6gu+O7wqawAyvM=
 github.com/posener/goreadme v1.1.7 h1:iyO18SXBPLyOMbd/xWRliM7AZBG+BIlK9b2egrAQwgA=
 github.com/posener/goreadme v1.1.7/go.mod h1:ftiMo9ZqMCxjRWgTTlvDA4H1ZjMzs6gu+O7wqawAyvM=
+github.com/posener/goreadme v1.1.8 h1:gsnfvgk9j7ty7f3M3fGmiogBsFLKGCBYuIHYIjyc16g=
+github.com/posener/goreadme v1.1.8/go.mod h1:kisdqpBv5ENmr1nUnH5MCyYLUjyN1zFGSkFoTfcVs84=
 github.com/prometheus/client_golang v0.8.0/go.mod h1:7SWBe2y4D6OKWSNQJUaRYU/AaXPKyh/dDVn+NZz0KFw=
 github.com/prometheus/client_model v0.0.0-20180712105110-5c3871d89910/go.mod h1:MbSGuTsp3dbXC40dX6PRTWyKYBIrTGTE9sqQNg2J8bo=
 github.com/prometheus/common v0.0.0-20180801064454-c7de2306084e/go.mod h1:daVV7qP5qjZbuso7PdcryaAu0sAZbrN9i7WWcTMWvro=
